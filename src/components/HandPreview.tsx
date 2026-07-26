@@ -12,37 +12,38 @@ interface FingerConfig {
   rotateOrigin?: [number, number];
 }
 
+// Left to right: index sits beside the thumb; pinky is farthest from it — matching real hand anatomy.
 const FINGERS: FingerConfig[] = [
-  { id: "pinky", cx: 178, baseY: 286, tipY: 152, baseWidth: 44, tipWidth: 34 },
-  { id: "ring", cx: 238, baseY: 286, tipY: 96, baseWidth: 50, tipWidth: 38 },
-  { id: "middle", cx: 298, baseY: 286, tipY: 68, baseWidth: 54, tipWidth: 40 },
-  { id: "index", cx: 358, baseY: 286, tipY: 100, baseWidth: 48, tipWidth: 36 },
+  { id: "index", cx: 178, baseY: 286, tipY: 100, baseWidth: 48, tipWidth: 36 },
+  { id: "middle", cx: 238, baseY: 286, tipY: 68, baseWidth: 54, tipWidth: 40 },
+  { id: "ring", cx: 298, baseY: 286, tipY: 96, baseWidth: 50, tipWidth: 38 },
+  { id: "pinky", cx: 358, baseY: 286, tipY: 152, baseWidth: 44, tipWidth: 34 },
 ];
 
 const THUMB: FingerConfig = {
   id: "thumb",
-  cx: 178,
-  baseY: 350,
-  tipY: 232,
-  baseWidth: 60,
+  cx: 100,
+  baseY: 358,
+  tipY: 248,
+  baseWidth: 58,
   tipWidth: 44,
-  rotate: -28,
-  rotateOrigin: [178, 350],
+  rotate: -26,
+  rotateOrigin: [100, 358],
 };
 
 const PALM_PATH =
-  "M 153 278 " +
-  "Q 175 264 197 278 " +
-  "Q 203 296 210 278 " +
-  "Q 235 260 260 278 " +
-  "Q 265 296 269 278 " +
-  "Q 298 256 327 278 " +
-  "Q 332 296 336 278 " +
+  "M 154 278 " +
+  "Q 178 264 202 278 " +
+  "Q 206 296 211 278 " +
+  "Q 238 260 265 278 " +
+  "Q 269 296 273 278 " +
+  "Q 298 262 323 278 " +
+  "Q 329 296 336 278 " +
   "Q 358 264 380 278 " +
-  "C 390 305 384 365 358 407 " +
-  "L 172 407 " +
-  "C 138 365 130 310 141 282 " +
-  "Q 147 274 153 278 " +
+  "C 392 305 386 365 360 407 " +
+  "L 140 407 " +
+  "C 100 400 78 365 85 320 " +
+  "C 90 295 118 280 154 278 " +
   "Z";
 
 /** A tapered finger silhouette: wide at the base (blends into the palm), narrow and rounded at the tip. */
