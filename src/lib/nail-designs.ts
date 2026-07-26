@@ -1,3 +1,15 @@
+export type FingerId = "thumb" | "index" | "middle" | "ring" | "pinky";
+
+export const FINGER_IDS: FingerId[] = ["thumb", "index", "middle", "ring", "pinky"];
+
+export const FINGER_LABELS: Record<FingerId, string> = {
+  thumb: "親指",
+  index: "人差し指",
+  middle: "中指",
+  ring: "薬指",
+  pinky: "小指",
+};
+
 export type NailShape =
   | "round"
   | "square"

@@ -1,8 +1,8 @@
-import { NAIL_SHAPES, NailDesign } from "@/lib/nail-designs";
+import { FingerId, NAIL_SHAPES, NailDesign } from "@/lib/nail-designs";
 import NailGraphic from "./NailGraphic";
 
 interface FingerConfig {
-  id: string;
+  id: FingerId;
   cx: number;
   baseY: number;
   tipY: number;
@@ -65,18 +65,24 @@ function fingerPath(f: FingerConfig): string {
 }
 
 interface HandPreviewProps {
-  design: NailDesign;
+  fingerDesigns: Record<FingerId, NailDesign>;
   skinColor: string;
+  activeFinger?: FingerId | "all";
+  onSelectFinger?: (id: FingerId) => void;
 }
 
 function Finger({
   finger,
   design,
   skinColor,
+  active,
+  onSelect,
 }: {
   finger: FingerConfig;
   design: NailDesign;
   skinColor: string;
+  active: boolean;
+  onSelect?: (id: FingerId) => void;
 }) {
   const def = NAIL_SHAPES[design.shape];
   const nailWidth = finger.tipWidth * 1.4;
@@ -85,8 +91,24 @@ function Finger({
   const nailY = finger.tipY - nailHeight * 0.46;
 
   return (
-    <g transform={`rotate(${finger.rotate} ${finger.cx} ${finger.baseY})`}>
+    <g
+      transform={`rotate(${finger.rotate} ${finger.cx} ${finger.baseY})`}
+      onClick={onSelect ? () => onSelect(finger.id) : undefined}
+      style={onSelect ? { cursor: "pointer" } : undefined}
+    >
       <path d={fingerPath(finger)} fill={skinColor} stroke="rgba(0,0,0,0.12)" strokeWidth={1} />
+      {active && (
+        <ellipse
+          cx={finger.cx}
+          cy={finger.tipY + finger.tipWidth * 0.1}
+          rx={finger.tipWidth * 0.95}
+          ry={finger.tipWidth * 1.15}
+          fill="none"
+          stroke="var(--nail-active-ring, #ec4899)"
+          strokeWidth={2.5}
+          opacity={0.85}
+        />
+      )}
       <svg
         x={nailX}
         y={nailY}
@@ -101,7 +123,12 @@ function Finger({
   );
 }
 
-export default function HandPreview({ design, skinColor }: HandPreviewProps) {
+export default function HandPreview({
+  fingerDesigns,
+  skinColor,
+  activeFinger = "all",
+  onSelectFinger,
+}: HandPreviewProps) {
   return (
     <svg viewBox="0 0 480 460" className="w-full h-full">
       <defs>
@@ -126,9 +153,22 @@ export default function HandPreview({ design, skinColor }: HandPreviewProps) {
       {/* wrist crease */}
       <path d="M 165 424 Q 255 438 345 424" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth={1.2} />
 
-      <Finger finger={THUMB} design={design} skinColor={skinColor} />
+      <Finger
+        finger={THUMB}
+        design={fingerDesigns.thumb}
+        skinColor={skinColor}
+        active={activeFinger === "thumb"}
+        onSelect={onSelectFinger}
+      />
       {FINGERS.map((f) => (
-        <Finger key={f.id} finger={f} design={design} skinColor={skinColor} />
+        <Finger
+          key={f.id}
+          finger={f}
+          design={fingerDesigns[f.id]}
+          skinColor={skinColor}
+          active={activeFinger === f.id}
+          onSelect={onSelectFinger}
+        />
       ))}
       <path d={PALM_PATH} fill="url(#hand-shade)" stroke="none" />
     </svg>
