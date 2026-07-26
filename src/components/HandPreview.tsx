@@ -22,21 +22,23 @@ const FINGERS: FingerConfig[] = [
 
 const THUMB: FingerConfig = {
   id: "thumb",
-  cx: 95,
-  baseY: 372,
-  tipY: 258,
+  cx: 100,
+  baseY: 400,
+  tipY: 284,
   baseWidth: 52,
   tipWidth: 40,
   rotate: -23,
 };
 
+// A trapezoid-ish palm: roughly as wide as the finger spread at the knuckles, tapering to a
+// narrower wrist, with a distinct thenar bulge on the thumb side (not a uniformly wide oval).
 const PALM_PATH =
   "M 151 300 " +
-  "Q 240 268 386 300 " +
-  "C 398 328 392 392 362 432 " +
-  "L 148 432 " +
-  "C 106 424 80 386 88 338 " +
-  "C 94 312 122 296 151 300 " +
+  "Q 268 276 386 300 " +
+  "Q 400 400 339 495 " +
+  "Q 268 505 198 495 " +
+  "Q 140 470 100 400 " +
+  "Q 95 340 151 300 " +
   "Z";
 
 /** A tapered finger silhouette: wide at the base (blends into the palm), narrow and rounded at the tip. */
@@ -124,7 +126,7 @@ export default function HandPreview({
   onSelectFinger,
 }: HandPreviewProps) {
   return (
-    <svg viewBox="0 0 480 460" className="w-full h-full">
+    <svg viewBox="0 0 480 520" className="w-full h-full">
       <defs>
         <linearGradient id="hand-shade" x1="0%" y1="0%" x2="65%" y2="100%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity={0.18} />
@@ -140,12 +142,12 @@ export default function HandPreview({
         {FINGERS.map((f) => (
           <path
             key={f.id}
-            d={`M ${f.cx} ${f.baseY} C ${f.cx} ${f.baseY + 45}, ${240 + (f.cx - 240) * 0.35} ${385}, ${240 + (f.cx - 240) * 0.18} ${420}`}
+            d={`M ${f.cx} ${f.baseY} C ${f.cx} ${f.baseY + 55}, ${268 + (f.cx - 268) * 0.35} ${460}, ${268 + (f.cx - 268) * 0.18} ${485}`}
           />
         ))}
       </g>
       {/* wrist crease */}
-      <path d="M 165 424 Q 255 438 345 424" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth={1.2} />
+      <path d="M 205 489 Q 268 503 333 489" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth={1.2} />
 
       <Finger
         finger={THUMB}
