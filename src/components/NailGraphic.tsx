@@ -19,6 +19,12 @@ export default function NailGraphic({
   const blurId = `blur-${uid}`;
   const [vbX, vbY, vbW, vbH] = def.viewBox.split(" ").map(Number);
   const tipBandHeight = vbH * 0.32;
+  const smileArch = vbH * 0.1;
+  const smileSideY = vbY + tipBandHeight - smileArch;
+  const smileCenterY = vbY + tipBandHeight + smileArch;
+  const frenchTipPath =
+    `M ${vbX} ${vbY} L ${vbX + vbW} ${vbY} L ${vbX + vbW} ${smileSideY} ` +
+    `Q ${vbX + vbW / 2} ${smileCenterY} ${vbX} ${smileSideY} Z`;
 
   return (
     <g>
@@ -70,15 +76,7 @@ export default function NailGraphic({
           <rect x={vbX} y={vbY} width={vbW} height={vbH} fill={`url(#${stripesId})`} />
         )}
 
-        {pattern === "french" && (
-          <rect
-            x={vbX}
-            y={vbY}
-            width={vbW}
-            height={tipBandHeight}
-            fill={accentColor}
-          />
-        )}
+        {pattern === "french" && <path d={frenchTipPath} fill={accentColor} />}
 
         {pattern === "glitter" && (
           <>
