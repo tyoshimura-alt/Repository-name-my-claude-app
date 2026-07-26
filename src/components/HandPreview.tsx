@@ -30,35 +30,101 @@ const THUMB: FingerConfig = {
   rotate: -23,
 };
 
-// A trapezoid-ish palm: roughly as wide as the finger spread at the knuckles, tapering to a
-// narrower wrist, with a distinct thenar bulge on the thumb side (not a uniformly wide oval).
-const PALM_PATH =
-  "M 151 300 " +
-  "Q 268 276 386 300 " +
-  "Q 400 400 339 495 " +
-  "Q 268 505 198 495 " +
-  "Q 140 470 100 400 " +
-  "Q 95 340 151 300 " +
-  "Z";
+const WRIST_LEFT = { x: 140, y: 500 };
+const WRIST_RIGHT = { x: 345, y: 500 };
 
-/** A tapered finger silhouette: wide at the base (blends into the palm), narrow and rounded at the tip. */
-function fingerPath(f: FingerConfig): string {
+interface Pt {
+  x: number;
+  y: number;
+}
+
+function rotate(p: Pt, origin: Pt, deg: number): Pt {
+  const rad = (deg * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const dx = p.x - origin.x;
+  const dy = p.y - origin.y;
+  return { x: origin.x + dx * cos - dy * sin, y: origin.y + dx * sin + dy * cos };
+}
+
+interface FingerGeo {
+  leftBase: Pt;
+  leftC1: Pt;
+  leftC2: Pt;
+  leftTip: Pt;
+  rightTip: Pt;
+  rightC1: Pt;
+  rightC2: Pt;
+  rightBase: Pt;
+  tw: number;
+}
+
+/** All key points of one tapered finger, rotated into the hand's shared coordinate space. */
+function fingerGeo(f: FingerConfig): FingerGeo {
   const bw = f.baseWidth / 2;
   const tw = f.tipWidth / 2;
-  const leftBase = f.cx - bw;
-  const rightBase = f.cx + bw;
-  const leftTip = f.cx - tw;
-  const rightTip = f.cx + tw;
   const tipShoulder = f.tipY + tw;
   const midY = tipShoulder + (f.baseY - tipShoulder) * 0.5;
+  const origin = { x: f.cx, y: f.baseY };
+  const local: Record<string, Pt> = {
+    leftBase: { x: f.cx - bw, y: f.baseY },
+    leftC1: { x: f.cx - bw, y: midY },
+    leftC2: { x: f.cx - tw, y: midY },
+    leftTip: { x: f.cx - tw, y: tipShoulder },
+    rightTip: { x: f.cx + tw, y: tipShoulder },
+    rightC1: { x: f.cx + tw, y: midY },
+    rightC2: { x: f.cx + bw, y: midY },
+    rightBase: { x: f.cx + bw, y: f.baseY },
+  };
+  const out: Record<string, Pt> = {};
+  for (const key of Object.keys(local)) out[key] = rotate(local[key], origin, f.rotate);
+  return { ...(out as unknown as FingerGeo), tw };
+}
+
+function fingerOutline(g: FingerGeo): string {
   return (
-    `M ${leftBase} ${f.baseY} ` +
-    `C ${leftBase} ${midY}, ${leftTip} ${midY}, ${leftTip} ${tipShoulder} ` +
-    `A ${tw} ${tw} 0 0 1 ${rightTip} ${tipShoulder} ` +
-    `C ${rightTip} ${midY}, ${rightBase} ${midY}, ${rightBase} ${f.baseY} ` +
-    `Z`
+    `C ${g.leftC1.x} ${g.leftC1.y}, ${g.leftC2.x} ${g.leftC2.y}, ${g.leftTip.x} ${g.leftTip.y} ` +
+    `A ${g.tw} ${g.tw} 0 0 1 ${g.rightTip.x} ${g.rightTip.y} ` +
+    `C ${g.rightC1.x} ${g.rightC1.y}, ${g.rightC2.x} ${g.rightC2.y}, ${g.rightBase.x} ${g.rightBase.y} `
   );
 }
+
+function webCurve(from: Pt, to: Pt, dip: number): string {
+  const midX = (from.x + to.x) / 2;
+  const midY = Math.max(from.y, to.y) + dip;
+  return `Q ${midX} ${midY} ${to.x} ${to.y} `;
+}
+
+/**
+ * The entire hand — palm, wrist and every finger — as a single continuous outline,
+ * so it reads as one hand rather than separate shapes glued together.
+ */
+function buildHandPath(): { path: string; geo: Record<FingerId, FingerGeo> } {
+  const th = fingerGeo(THUMB);
+  const idx = fingerGeo(FINGERS[0]);
+  const mid = fingerGeo(FINGERS[1]);
+  const ring = fingerGeo(FINGERS[2]);
+  const pinky = fingerGeo(FINGERS[3]);
+
+  let d = `M ${WRIST_LEFT.x} ${WRIST_LEFT.y} `;
+  d += `C 68 460, 62 430, ${th.leftBase.x} ${th.leftBase.y} `;
+  d += fingerOutline(th);
+  d += webCurve(th.rightBase, idx.leftBase, 46);
+  d += fingerOutline(idx);
+  d += webCurve(idx.rightBase, mid.leftBase, 16);
+  d += fingerOutline(mid);
+  d += webCurve(mid.rightBase, ring.leftBase, 16);
+  d += fingerOutline(ring);
+  d += webCurve(ring.rightBase, pinky.leftBase, 16);
+  d += fingerOutline(pinky);
+  d += `C 412 340, 402 460, ${WRIST_RIGHT.x} ${WRIST_RIGHT.y} `;
+  d += `Q 242 514 ${WRIST_LEFT.x} ${WRIST_LEFT.y} `;
+  d += "Z";
+
+  return { path: d, geo: { thumb: th, index: idx, middle: mid, ring, pinky } };
+}
+
+const HAND = buildHandPath();
 
 interface HandPreviewProps {
   fingerDesigns: Record<FingerId, NailDesign>;
@@ -67,16 +133,14 @@ interface HandPreviewProps {
   onSelectFinger?: (id: FingerId) => void;
 }
 
-function Finger({
+function FingerNail({
   finger,
   design,
-  skinColor,
   active,
   onSelect,
 }: {
   finger: FingerConfig;
   design: NailDesign;
-  skinColor: string;
   active: boolean;
   onSelect?: (id: FingerId) => void;
 }) {
@@ -92,7 +156,15 @@ function Finger({
       onClick={onSelect ? () => onSelect(finger.id) : undefined}
       style={onSelect ? { cursor: "pointer" } : undefined}
     >
-      <path d={fingerPath(finger)} fill={skinColor} stroke="rgba(0,0,0,0.12)" strokeWidth={1} />
+      {onSelect && (
+        <rect
+          x={finger.cx - finger.baseWidth / 2}
+          y={finger.tipY - finger.tipWidth}
+          width={finger.baseWidth}
+          height={finger.baseY - finger.tipY + finger.tipWidth}
+          fill="transparent"
+        />
+      )}
       {active && (
         <ellipse
           cx={finger.cx}
@@ -135,7 +207,7 @@ export default function HandPreview({
         </linearGradient>
       </defs>
 
-      <path d={PALM_PATH} fill={skinColor} stroke="rgba(0,0,0,0.12)" strokeWidth={1} />
+      <path d={HAND.path} fill={skinColor} stroke="rgba(0,0,0,0.14)" strokeWidth={1.2} />
 
       {/* faint tendon lines running from each knuckle toward the wrist */}
       <g stroke="rgba(0,0,0,0.06)" strokeWidth={1.2} fill="none">
@@ -149,24 +221,23 @@ export default function HandPreview({
       {/* wrist crease */}
       <path d="M 205 489 Q 268 503 333 489" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth={1.2} />
 
-      <Finger
+      <path d={HAND.path} fill="url(#hand-shade)" stroke="none" />
+
+      <FingerNail
         finger={THUMB}
         design={fingerDesigns.thumb}
-        skinColor={skinColor}
         active={activeFinger === "thumb"}
         onSelect={onSelectFinger}
       />
       {FINGERS.map((f) => (
-        <Finger
+        <FingerNail
           key={f.id}
           finger={f}
           design={fingerDesigns[f.id]}
-          skinColor={skinColor}
           active={activeFinger === f.id}
           onSelect={onSelectFinger}
         />
       ))}
-      <path d={PALM_PATH} fill="url(#hand-shade)" stroke="none" />
     </svg>
   );
 }
