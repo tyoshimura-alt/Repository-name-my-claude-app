@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Claude Chat",
-  description: "Anthropic APIを使ったチャットアプリ",
+  title: "ネイルデザイン シミュレーター",
+  description: "ネイルの形・色・パターンを選んで仕上がりを試せるアプリ",
 };
 
 export default function RootLayout({
