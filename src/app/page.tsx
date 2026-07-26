@@ -1,139 +1,166 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+  DEFAULT_DESIGN,
+  NAIL_PATTERNS,
+  NAIL_SHAPES,
+  NailDesign,
+  NailPattern,
+  NailShape,
+  PRESETS,
+  SKIN_TONES,
+} from "@/lib/nail-designs";
+import NailGraphic from "@/components/NailGraphic";
+import HandPreview from "@/components/HandPreview";
+import DesignControls from "@/components/DesignControls";
+import Catalog, { CatalogItem } from "@/components/Catalog";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
+const FAVORITES_KEY = "nail-app-favorites";
+
+interface Favorite extends CatalogItem {
+  savedAt: number;
+}
+
+function randomFrom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [design, setDesign] = useState<NailDesign>(DEFAULT_DESIGN);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  async function sendMessage(e: React.FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text || isLoading) return;
-
-    const userMessage: Message = { role: "user", content: text };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInput("");
-    setIsLoading(true);
-
-    const assistantMessage: Message = { role: "assistant", content: "" };
-    setMessages([...newMessages, assistantMessage]);
-
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
-      });
-
-      if (!res.body) throw new Error("No response body");
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            role: "assistant",
-            content: updated[updated.length - 1].content + chunk,
-          };
-          return updated;
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          role: "assistant",
-          content: "エラーが発生しました。もう一度お試しください。",
-        };
-        return updated;
-      });
-    } finally {
-      setIsLoading(false);
+      const raw = localStorage.getItem(FAVORITES_KEY);
+      // one-time hydration from localStorage on mount; not a reactive sync
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (raw) setFavorites(JSON.parse(raw));
+    } catch {
+      // ignore corrupt storage
     }
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+  }, [favorites, loaded]);
+
+  function patchDesign(patch: Partial<NailDesign>) {
+    setDesign((d) => ({ ...d, ...patch }));
   }
 
+  function applyDesign(d: NailDesign) {
+    setDesign({
+      shape: d.shape,
+      baseColor: d.baseColor,
+      pattern: d.pattern,
+      accentColor: d.accentColor,
+      skinTone: d.skinTone,
+    });
+  }
+
+  function shuffle() {
+    const shapes = Object.keys(NAIL_SHAPES) as NailShape[];
+    const patterns = Object.keys(NAIL_PATTERNS) as NailPattern[];
+    const preset = randomFrom(PRESETS);
+    setDesign({
+      shape: randomFrom(shapes),
+      baseColor: preset.baseColor,
+      pattern: randomFrom(patterns),
+      accentColor: preset.accentColor,
+      skinTone: randomFrom(SKIN_TONES).id,
+    });
+  }
+
+  function saveFavorite() {
+    const name = `マイデザイン ${favorites.length + 1}`;
+    const fav: Favorite = {
+      id: `fav-${Date.now()}`,
+      name,
+      savedAt: Date.now(),
+      ...design,
+    };
+    setFavorites((prev) => [fav, ...prev]);
+  }
+
+  function removeFavorite(id: string) {
+    setFavorites((prev) => prev.filter((f) => f.id !== id));
+  }
+
+  const skinColor = SKIN_TONES.find((t) => t.id === design.skinTone)?.color ?? "#e7bd94";
+  const bigDef = NAIL_SHAPES[design.shape];
+
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
-        <h1 className="text-lg font-semibold text-gray-800">Claude Chat</h1>
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 via-white to-white">
+      <header className="bg-white/80 backdrop-blur border-b border-pink-100 px-4 py-4 sticky top-0 z-20">
+        <h1 className="text-lg font-semibold text-gray-800">
+          💅 ネイルデザイン シミュレーター
+        </h1>
+        <p className="text-xs text-gray-500 mt-0.5">
+          形・色・パターンを選んで、仕上がりをその場でチェック
+        </p>
       </header>
 
-      {/* Messages */}
-      <main className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-        {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-400 text-sm">
-              メッセージを入力して会話を始めましょう
-            </p>
-          </div>
-        )}
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-800 border border-gray-200 shadow-sm"
-              }`}
-            >
-              {msg.content}
-              {msg.role === "assistant" && !msg.content && isLoading && (
-                <span className="inline-flex gap-1">
-                  <span className="animate-bounce">●</span>
-                  <span className="animate-bounce [animation-delay:150ms]">●</span>
-                  <span className="animate-bounce [animation-delay:300ms]">●</span>
-                </span>
-              )}
+      <main className="max-w-5xl mx-auto px-4 py-6 space-y-10">
+        {/* Preview + Controls */}
+        <section className="grid md:grid-cols-2 gap-6">
+          <div className="rounded-2xl border border-pink-100 bg-white shadow-sm p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-700">プレビュー</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={shuffle}
+                  className="text-xs font-medium rounded-full border border-gray-200 px-3 py-1.5 text-gray-600 hover:bg-gray-50"
+                >
+                  🎲 ランダム
+                </button>
+                <button
+                  onClick={() => applyDesign(DEFAULT_DESIGN)}
+                  className="text-xs font-medium rounded-full border border-gray-200 px-3 py-1.5 text-gray-600 hover:bg-gray-50"
+                >
+                  リセット
+                </button>
+                <button
+                  onClick={saveFavorite}
+                  className="text-xs font-medium rounded-full bg-pink-600 text-white px-3 py-1.5 hover:bg-pink-700"
+                >
+                  ♥ 保存
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-gray-50">
+              <HandPreview design={design} skinColor={skinColor} />
+            </div>
+
+            <div className="flex justify-center">
+              <div className="w-28 h-40">
+                <svg viewBox={bigDef.viewBox} className="w-full h-full drop-shadow">
+                  <NailGraphic uid="big-preview" {...design} />
+                </svg>
+              </div>
             </div>
           </div>
-        ))}
-        <div ref={bottomRef} />
-      </main>
 
-      {/* Input */}
-      <form
-        onSubmit={sendMessage}
-        className="bg-white border-t border-gray-200 px-4 py-3 flex gap-2"
-      >
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="メッセージを入力..."
-          disabled={isLoading}
-          className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+          <div className="rounded-2xl border border-pink-100 bg-white shadow-sm p-4">
+            <DesignControls design={design} onChange={patchDesign} />
+          </div>
+        </section>
+
+        {/* Catalog */}
+        <Catalog title="デザインカタログ" items={PRESETS} onSelect={applyDesign} />
+
+        {/* Favorites */}
+        <Catalog
+          title="お気に入り"
+          items={favorites}
+          onSelect={applyDesign}
+          onRemove={removeFavorite}
+          emptyMessage="プレビューの「♥ 保存」ボタンで、気に入ったデザインをここに保存できます。"
         />
-        <button
-          type="submit"
-          disabled={!input.trim() || isLoading}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-5 py-2 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          送信
-        </button>
-      </form>
+      </main>
     </div>
   );
 }
