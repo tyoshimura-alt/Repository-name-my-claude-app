@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   COLOR_SWATCHES,
+  COORDINATED_PALETTES,
   DEFAULT_DESIGN,
   HANDS,
   NAIL_IDS,
@@ -130,6 +131,26 @@ export default function Home() {
     }
   }
 
+  function coordinateShuffle() {
+    const shapes = Object.keys(NAIL_SHAPES) as NailShape[];
+    const patterns = Object.keys(NAIL_PATTERNS) as NailPattern[];
+    const sharedShape = randomFrom(shapes);
+    const palette = randomFrom(COORDINATED_PALETTES);
+    const next: Partial<Record<NailId, NailDesign>> = {};
+    NAIL_IDS.forEach((id) => {
+      next[id] = {
+        shape: sharedShape,
+        baseColor: palette.base,
+        pattern: randomFrom(patterns),
+        accentColor: palette.accent,
+        length: randomFrom([1, 2, 3, 4, 5]),
+      };
+    });
+    setOverrides(next);
+    setTemplate(next.left_index!);
+    setActiveNail("all");
+  }
+
   function resetAll() {
     setTemplate(DEFAULT_DESIGN);
     setOverrides({});
@@ -180,24 +201,30 @@ export default function Home() {
         {/* Preview + Controls */}
         <section className="grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-pink-100 bg-white shadow-sm p-4 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-sm font-semibold text-gray-700">プレビュー</h2>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap justify-end">
                 <button
                   onClick={shuffle}
-                  className="text-xs font-medium rounded-full border border-gray-200 px-3 py-1.5 text-gray-600 hover:bg-gray-50"
+                  className="text-xs font-medium rounded-full border border-gray-200 px-3 py-1.5 text-gray-600 hover:bg-gray-50 whitespace-nowrap"
                 >
                   🎲 ランダム
                 </button>
                 <button
+                  onClick={coordinateShuffle}
+                  className="text-xs font-medium rounded-full border border-gray-200 px-3 py-1.5 text-gray-600 hover:bg-gray-50 whitespace-nowrap"
+                >
+                  🎨 コーディネート
+                </button>
+                <button
                   onClick={resetAll}
-                  className="text-xs font-medium rounded-full border border-gray-200 px-3 py-1.5 text-gray-600 hover:bg-gray-50"
+                  className="text-xs font-medium rounded-full border border-gray-200 px-3 py-1.5 text-gray-600 hover:bg-gray-50 whitespace-nowrap"
                 >
                   リセット
                 </button>
                 <button
                   onClick={saveFavorite}
-                  className="text-xs font-medium rounded-full bg-pink-600 text-white px-3 py-1.5 hover:bg-pink-700"
+                  className="text-xs font-medium rounded-full bg-pink-600 text-white px-3 py-1.5 hover:bg-pink-700 whitespace-nowrap"
                 >
                   ♥ 保存
                 </button>

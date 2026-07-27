@@ -92,7 +92,10 @@ export type NailPattern =
   | "glitter"
   | "dots"
   | "stripes"
-  | "marble";
+  | "marble"
+  | "halfMoon"
+  | "diagonal"
+  | "checker";
 
 export interface ShapeDef {
   label: string;
@@ -167,6 +170,9 @@ export const NAIL_PATTERNS: Record<NailPattern, PatternDef> = {
   dots: { label: "ドット", needsAccent: true },
   stripes: { label: "ストライプ", needsAccent: true },
   marble: { label: "マーブル", needsAccent: true },
+  halfMoon: { label: "ハーフムーン", needsAccent: true },
+  diagonal: { label: "ツートン", needsAccent: true },
+  checker: { label: "チェック", needsAccent: true },
 };
 
 export interface NailDesign {
@@ -203,6 +209,22 @@ export const COLOR_SWATCHES: string[] = [
   "#D8C7EC", // lavender
   "#FFFFFF", // white
   "#222222", // black
+];
+
+// Hand-picked base/accent pairings that look intentional together, used by the
+// "コーディネート" shuffle so all 10 nails share one cohesive color story instead
+// of fully independent random colors per finger.
+export const COORDINATED_PALETTES: { base: string; accent: string }[] = [
+  { base: "#E8C4A0", accent: "#FFFFFF" }, // nude + white
+  { base: "#F7B8D0", accent: "#FFD9E8" }, // soft pink family
+  { base: "#6B0F1A", accent: "#E85C8A" }, // burgundy + magenta
+  { base: "#34506B", accent: "#A9C4D8" }, // navy + dusty blue
+  { base: "#7FB069", accent: "#E6D2B5" }, // sage + tan
+  { base: "#222222", accent: "#FFFFFF" }, // classic mono
+  { base: "#7B5EA7", accent: "#D8C7EC" }, // deep purple + lavender
+  { base: "#E8A23D", accent: "#FF7E5F" }, // mustard + coral
+  { base: "#4FA89B", accent: "#FFFFFF" }, // teal + white
+  { base: "#C21E33", accent: "#222222" }, // red + black
 ];
 
 export const DEFAULT_DESIGN: NailDesign = {

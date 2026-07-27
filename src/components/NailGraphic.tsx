@@ -26,6 +26,20 @@ export default function NailGraphic({
     `M ${vbX} ${vbY} L ${vbX + vbW} ${vbY} L ${vbX + vbW} ${smileSideY} ` +
     `Q ${vbX + vbW / 2} ${smileCenterY} ${vbX} ${smileSideY} Z`;
 
+  const moonBandHeight = vbH * 0.2;
+  const moonArch = vbH * 0.1;
+  const moonBottomY = vbY + vbH;
+  const moonSideY = moonBottomY - moonBandHeight - moonArch;
+  const moonCenterY = moonBottomY - moonBandHeight + moonArch;
+  const halfMoonPath =
+    `M ${vbX} ${moonBottomY} L ${vbX + vbW} ${moonBottomY} L ${vbX + vbW} ${moonSideY} ` +
+    `Q ${vbX + vbW / 2} ${moonCenterY} ${vbX} ${moonSideY} Z`;
+
+  const diagonalPath =
+    `M ${vbX + vbW} ${vbY} L ${vbX + vbW} ${vbY + vbH * 0.55} ` +
+    `L ${vbX} ${vbY + vbH} L ${vbX} ${vbY + vbH * 0.2} Z`;
+  const checkerId = `checker-${uid}`;
+
   return (
     <g>
       <defs>
@@ -58,6 +72,16 @@ export default function NailGraphic({
         <filter id={blurId} x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="4" />
         </filter>
+        <pattern
+          id={checkerId}
+          width="12"
+          height="12"
+          patternUnits="userSpaceOnUse"
+        >
+          <rect width="12" height="12" fill={baseColor} />
+          <rect width="6" height="6" fill={accentColor} />
+          <rect x="6" y="6" width="6" height="6" fill={accentColor} />
+        </pattern>
       </defs>
 
       <g clipPath={`url(#${clipId})`}>
@@ -77,6 +101,14 @@ export default function NailGraphic({
         )}
 
         {pattern === "french" && <path d={frenchTipPath} fill={accentColor} />}
+
+        {pattern === "halfMoon" && <path d={halfMoonPath} fill={accentColor} />}
+
+        {pattern === "diagonal" && <path d={diagonalPath} fill={accentColor} />}
+
+        {pattern === "checker" && (
+          <rect x={vbX} y={vbY} width={vbW} height={vbH} fill={`url(#${checkerId})`} />
+        )}
 
         {pattern === "glitter" && (
           <>
