@@ -20,8 +20,8 @@ export default function NailGraphic({
   const [vbX, vbY, vbW, vbH] = def.viewBox.split(" ").map(Number);
   const tipBandHeight = vbH * 0.32;
   const smileArch = vbH * 0.1;
-  const smileSideY = vbY + tipBandHeight - smileArch;
-  const smileCenterY = vbY + tipBandHeight + smileArch;
+  const smileSideY = vbY + tipBandHeight + smileArch;
+  const smileCenterY = vbY + tipBandHeight - smileArch;
   const frenchTipPath =
     `M ${vbX} ${vbY} L ${vbX + vbW} ${vbY} L ${vbX + vbW} ${smileSideY} ` +
     `Q ${vbX + vbW / 2} ${smileCenterY} ${vbX} ${smileSideY} Z`;
