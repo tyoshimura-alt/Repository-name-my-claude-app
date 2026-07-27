@@ -175,7 +175,7 @@ export const NAIL_PATTERNS: Record<NailPattern, PatternDef> = {
   checker: { label: "チェック", needsAccent: true },
 };
 
-export type PartShape = "heart" | "star" | "ribbon" | "flower" | "cross" | "dot";
+export type PartShape = "heart" | "star" | "ribbon" | "flower" | "cross" | "dot" | "chain";
 
 export const PART_SHAPE_LABELS: Record<PartShape, string> = {
   heart: "ハート",
@@ -184,6 +184,7 @@ export const PART_SHAPE_LABELS: Record<PartShape, string> = {
   flower: "フラワー",
   cross: "クロス",
   dot: "丸", // "ドット" is avoided here since the pattern picker already has a "ドット" (polka-dot) option
+  chain: "チェーン",
 };
 
 // Unit-sized (roughly -3..3) SVG path data centered on the origin, for shapes
@@ -204,6 +205,17 @@ export const PART_SHAPE_PATHS: Partial<Record<PartShape, string>> = {
     "M-0.39,1.05 A1.15,1.15 0 1,0 1.91,1.05 A1.15,1.15 0 1,0 -0.39,1.05 Z " +
     "M-1.91,1.05 A1.15,1.15 0 1,0 0.39,1.05 A1.15,1.15 0 1,0 -1.91,1.05 Z " +
     "M-2.39,-0.4 A1.15,1.15 0 1,0 -0.09,-0.4 A1.15,1.15 0 1,0 -2.39,-0.4 Z",
+  // Four linked rings drawn as nested circles; rendered with fill-rule="evenodd"
+  // so each ring's inside becomes a hole instead of a solid disc.
+  chain:
+    "M-2.95,0.6 A0.85,0.85 0 1,0 -1.25,0.6 A0.85,0.85 0 1,0 -2.95,0.6 Z " +
+    "M-2.55,0.6 A0.45,0.45 0 1,0 -1.65,0.6 A0.45,0.45 0 1,0 -2.55,0.6 Z " +
+    "M-1.55,-0.3 A0.85,0.85 0 1,0 0.15,-0.3 A0.85,0.85 0 1,0 -1.55,-0.3 Z " +
+    "M-1.15,-0.3 A0.45,0.45 0 1,0 -0.25,-0.3 A0.45,0.45 0 1,0 -1.15,-0.3 Z " +
+    "M-0.15,0.6 A0.85,0.85 0 1,0 1.55,0.6 A0.85,0.85 0 1,0 -0.15,0.6 Z " +
+    "M0.25,0.6 A0.45,0.45 0 1,0 1.15,0.6 A0.45,0.45 0 1,0 0.25,0.6 Z " +
+    "M1.25,-0.3 A0.85,0.85 0 1,0 2.95,-0.3 A0.85,0.85 0 1,0 1.25,-0.3 Z " +
+    "M1.65,-0.3 A0.45,0.45 0 1,0 2.55,-0.3 A0.45,0.45 0 1,0 1.65,-0.3 Z",
 };
 
 export interface PlacedPart {

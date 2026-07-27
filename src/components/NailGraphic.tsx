@@ -173,7 +173,13 @@ export default function NailGraphic({
           if (!d) return null;
           return (
             <g key={p.id} transform={`translate(${cx} ${cy}) rotate(${p.rotation}) scale(${partScale})`}>
-              <path d={d} fill={p.color} stroke="rgba(0,0,0,0.25)" strokeWidth={0.15} />
+              <path
+                d={d}
+                fill={p.color}
+                fillRule={p.shape === "chain" ? "evenodd" : undefined}
+                stroke="rgba(0,0,0,0.25)"
+                strokeWidth={0.15}
+              />
             </g>
           );
         })}
