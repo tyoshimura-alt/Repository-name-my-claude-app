@@ -19,7 +19,7 @@ export default function NailGraphic({
   const blurId = `blur-${uid}`;
   const [vbX, vbY, vbW, vbH] = def.viewBox.split(" ").map(Number);
   const tipBandHeight = vbH * 0.32;
-  const smileArch = vbH * 0.1;
+  const smileArch = vbH * 0.16;
   const smileSideY = vbY + tipBandHeight + smileArch;
   const smileCenterY = vbY + tipBandHeight - smileArch;
   const frenchTipPath =

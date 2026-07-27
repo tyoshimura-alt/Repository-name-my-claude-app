@@ -5,7 +5,6 @@ import {
   NailDesign,
   NailPattern,
   NailShape,
-  SKIN_TONES,
 } from "@/lib/nail-designs";
 
 interface DesignControlsProps {
@@ -107,23 +106,6 @@ export default function DesignControls({ design, onChange }: DesignControlsProps
           />
         </section>
       )}
-
-      <section>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">肌の色（プレビュー用）</h3>
-        <div className="flex gap-2">
-          {SKIN_TONES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onChange({ skinTone: t.id })}
-              title={t.label}
-              className={`w-8 h-8 rounded-full border-2 ${
-                design.skinTone === t.id ? "border-pink-500 scale-110" : "border-white"
-              } shadow ring-1 ring-gray-200 transition-transform`}
-              style={{ backgroundColor: t.color }}
-            />
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

@@ -81,26 +81,11 @@ export const NAIL_PATTERNS: Record<NailPattern, PatternDef> = {
   marble: { label: "マーブル", needsAccent: true },
 };
 
-export interface SkinTone {
-  id: string;
-  label: string;
-  color: string;
-}
-
-export const SKIN_TONES: SkinTone[] = [
-  { id: "light", label: "ライト", color: "#f3d5b8" },
-  { id: "fair", label: "フェア", color: "#e7bd94" },
-  { id: "medium", label: "ミディアム", color: "#c98e5f" },
-  { id: "tan", label: "タン", color: "#a8703f" },
-  { id: "deep", label: "ディープ", color: "#6b432a" },
-];
-
 export interface NailDesign {
   shape: NailShape;
   baseColor: string;
   pattern: NailPattern;
   accentColor: string;
-  skinTone: string;
 }
 
 export interface DesignPreset extends NailDesign {
@@ -129,7 +114,6 @@ export const DEFAULT_DESIGN: NailDesign = {
   baseColor: "#E8C4A0",
   pattern: "solid",
   accentColor: "#FFFFFF",
-  skinTone: "fair",
 };
 
 export const PRESETS: DesignPreset[] = [
@@ -140,7 +124,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#E8C4A0",
     pattern: "solid",
     accentColor: "#FFFFFF",
-    skinTone: "fair",
     tags: ["オフィス", "シンプル"],
   },
   {
@@ -150,7 +133,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#F5DFC8",
     pattern: "french",
     accentColor: "#FFFFFF",
-    skinTone: "light",
     tags: ["定番", "フォーマル"],
   },
   {
@@ -160,7 +142,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#C21E33",
     pattern: "solid",
     accentColor: "#FFFFFF",
-    skinTone: "medium",
     tags: ["赤", "モード"],
   },
   {
@@ -170,7 +151,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#F7B8D0",
     pattern: "glitter",
     accentColor: "#FFD9E8",
-    skinTone: "fair",
     tags: ["キラキラ", "パーティー"],
   },
   {
@@ -180,7 +160,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FFD700",
     pattern: "gradient",
     accentColor: "#FFF6C8",
-    skinTone: "tan",
     tags: ["グラデ", "華やか"],
   },
   {
@@ -190,7 +169,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#A9C4D8",
     pattern: "dots",
     accentColor: "#FFFFFF",
-    skinTone: "light",
     tags: ["ドット", "カジュアル"],
   },
   {
@@ -200,7 +178,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#E6D2B5",
     pattern: "marble",
     accentColor: "#C79A6B",
-    skinTone: "medium",
     tags: ["マーブル", "上品"],
   },
   {
@@ -210,7 +187,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FFFFFF",
     pattern: "stripes",
     accentColor: "#222222",
-    skinTone: "fair",
     tags: ["モノトーン", "モード"],
   },
   {
@@ -220,7 +196,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#6B0F1A",
     pattern: "solid",
     accentColor: "#FFFFFF",
-    skinTone: "deep",
     tags: ["赤", "個性的"],
   },
   {
@@ -230,7 +205,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FF7E5F",
     pattern: "gradient",
     accentColor: "#FEB47B",
-    skinTone: "tan",
     tags: ["グラデ", "夏"],
   },
   {
@@ -240,7 +214,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#D8C7EC",
     pattern: "solid",
     accentColor: "#FFFFFF",
-    skinTone: "light",
     tags: ["パステル", "春"],
   },
   {
@@ -250,7 +223,6 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FFFFFF",
     pattern: "glitter",
     accentColor: "#E0E0E0",
-    skinTone: "fair",
     tags: ["キラキラ", "上品"],
   },
 ];

@@ -12,10 +12,9 @@ import {
   NailPattern,
   NailShape,
   PRESETS,
-  SKIN_TONES,
 } from "@/lib/nail-designs";
 import NailGraphic from "@/components/NailGraphic";
-import HandPreview from "@/components/HandPreview";
+import NailRow from "@/components/NailRow";
 import DesignControls from "@/components/DesignControls";
 import Catalog from "@/components/Catalog";
 
@@ -41,7 +40,6 @@ function randomDesign(): NailDesign {
     baseColor: preset.baseColor,
     pattern: randomFrom(patterns),
     accentColor: preset.accentColor,
-    skinTone: randomFrom(SKIN_TONES).id,
   };
 }
 
@@ -51,7 +49,6 @@ function pickDesign(d: NailDesign): NailDesign {
     baseColor: d.baseColor,
     pattern: d.pattern,
     accentColor: d.accentColor,
-    skinTone: d.skinTone,
   };
 }
 
@@ -148,7 +145,6 @@ export default function Home() {
     setFavorites((prev) => prev.filter((f) => f.id !== id));
   }
 
-  const skinColor = SKIN_TONES.find((t) => t.id === displayedDesign.skinTone)?.color ?? "#e7bd94";
   const bigDef = NAIL_SHAPES[displayedDesign.shape];
 
   return (
@@ -219,19 +215,16 @@ export default function Home() {
               </div>
               {activeFinger === "all" && (
                 <p className="text-[11px] text-gray-400 mt-1.5">
-                  「全部」を選んでいる間は、変更するとすべての爪に反映されます。1本ずつ変えたいときは上のタブか、手のプレビューの爪を直接タップしてください。
+                  「全部」を選んでいる間は、変更するとすべての爪に反映されます。1本ずつ変えたいときは上のタブか、下のプレビューの爪を直接タップしてください。
                 </p>
               )}
             </div>
 
-            <div className="rounded-xl bg-gray-50">
-              <HandPreview
-                fingerDesigns={fingerDesigns}
-                skinColor={skinColor}
-                activeFinger={activeFinger}
-                onSelectFinger={setActiveFinger}
-              />
-            </div>
+            <NailRow
+              fingerDesigns={fingerDesigns}
+              activeFinger={activeFinger}
+              onSelectFinger={setActiveFinger}
+            />
 
             <div className="flex justify-center">
               <div className="w-28 h-40">
