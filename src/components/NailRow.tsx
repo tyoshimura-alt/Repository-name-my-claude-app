@@ -1,4 +1,5 @@
 import {
+  FINGER_HEIGHT_SCALE,
   FINGER_IDS,
   FINGER_LABELS,
   HAND_LABELS,
@@ -52,12 +53,13 @@ function HandRow({
   return (
     <div>
       <p className="text-[11px] font-medium text-gray-400 mb-1">{HAND_LABELS[hand]}</p>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-2 items-end">
         {FINGER_IDS.map((finger) => {
           const id = `${hand}_${finger}` as NailId;
           const design = nailDesigns[id];
           const active = activeNail === id;
           const { width, height } = nailBoxSize(design.shape, NEUTRAL_HEIGHT, design.length, finger);
+          const containerHeight = PREVIEW_BOX_HEIGHT * (FINGER_HEIGHT_SCALE[finger] ?? 1);
           return (
             <button
               key={id}
@@ -66,7 +68,7 @@ function HandRow({
                 active ? "border-pink-500 bg-pink-50" : "border-gray-200 bg-white hover:border-pink-300"
               }`}
             >
-              <div style={{ height: PREVIEW_BOX_HEIGHT }} className="w-full flex items-end justify-center">
+              <div style={{ height: containerHeight }} className="w-full flex items-end justify-center">
                 <svg
                   width={width}
                   height={height}
