@@ -80,7 +80,7 @@ function HandRow({
                 active ? "border-pink-500 bg-pink-50" : "border-gray-200 bg-white hover:border-pink-300"
               }`}
             >
-              <div style={{ height: containerHeight }} className="w-full flex items-end justify-center">
+              <div style={{ height: containerHeight }} className="w-full flex flex-col items-center justify-end">
                 <svg
                   width={width}
                   height={height}
@@ -90,6 +90,7 @@ function HandRow({
                 >
                   <NailGraphic uid={`row-${id}`} {...design} />
                 </svg>
+                <div style={{ width }} className="h-[3px] rounded-full bg-gray-300 mt-1" />
               </div>
               <span className={`text-[11px] font-medium ${active ? "text-pink-600" : "text-gray-500"}`}>
                 {FINGER_LABELS[finger]}
