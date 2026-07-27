@@ -1,21 +1,20 @@
 import {
-  FINGER_HEIGHT_SCALE,
   FINGER_IDS,
   FINGER_LABELS,
   HAND_LABELS,
   HANDS,
   Hand,
-  LENGTH_SCALE,
+  NAIL_IDS,
   NAIL_SHAPES,
   NailDesign,
   NailId,
   nailBoxSize,
+  nailFinger,
 } from "@/lib/nail-designs";
 import NailGraphic from "./NailGraphic";
 
 const NEUTRAL_HEIGHT = 72;
-const MAX_LENGTH_SCALE = Math.max(...Object.values(LENGTH_SCALE));
-const PREVIEW_BOX_HEIGHT = Math.ceil(NEUTRAL_HEIGHT * MAX_LENGTH_SCALE);
+const ROW_BOX_PADDING = 4;
 
 interface NailRowProps {
   nailDesigns: Record<NailId, NailDesign>;
@@ -24,6 +23,17 @@ interface NailRowProps {
 }
 
 export default function NailRow({ nailDesigns, activeNail = "all", onSelectNail }: NailRowProps) {
+  // Shared box height across all 10 cards, sized to whatever the tallest nail *currently*
+  // needs (length level + finger scale) rather than a hardcoded worst case. Keeps every
+  // card border the same size while still leaving a visible gap above shorter nails.
+  const containerHeight =
+    Math.max(
+      ...NAIL_IDS.map((id) => {
+        const d = nailDesigns[id];
+        return nailBoxSize(d.shape, NEUTRAL_HEIGHT, d.length, nailFinger(id)).height;
+      })
+    ) + ROW_BOX_PADDING;
+
   return (
     <div className="space-y-3">
       {HANDS.map((hand) => (
@@ -33,6 +43,7 @@ export default function NailRow({ nailDesigns, activeNail = "all", onSelectNail 
           nailDesigns={nailDesigns}
           activeNail={activeNail}
           onSelectNail={onSelectNail}
+          containerHeight={containerHeight}
         />
       ))}
     </div>
@@ -44,22 +55,23 @@ function HandRow({
   nailDesigns,
   activeNail,
   onSelectNail,
+  containerHeight,
 }: {
   hand: Hand;
   nailDesigns: Record<NailId, NailDesign>;
   activeNail: NailId | "all";
   onSelectNail?: (id: NailId) => void;
+  containerHeight: number;
 }) {
   return (
     <div>
       <p className="text-[11px] font-medium text-gray-400 mb-1">{HAND_LABELS[hand]}</p>
-      <div className="grid grid-cols-5 gap-2 items-end">
+      <div className="grid grid-cols-5 gap-2">
         {FINGER_IDS.map((finger) => {
           const id = `${hand}_${finger}` as NailId;
           const design = nailDesigns[id];
           const active = activeNail === id;
           const { width, height } = nailBoxSize(design.shape, NEUTRAL_HEIGHT, design.length, finger);
-          const containerHeight = PREVIEW_BOX_HEIGHT * (FINGER_HEIGHT_SCALE[finger] ?? 1);
           return (
             <button
               key={id}
