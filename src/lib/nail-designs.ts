@@ -57,21 +57,23 @@ export const LENGTH_SCALE: Record<number, number> = {
   5: 1.42,
 };
 
-// Baseline per-finger size adjustment (independent of the length control): the thumb
-// nail bed is naturally wider, the pinky nail bed is naturally smaller overall.
+// Baseline per-finger size adjustment (independent of the length control), modeling
+// natural nail-bed proportions across all five fingers rather than just the thumb/
+// pinky extremes: middle is the largest reference, index/ring taper slightly from
+// it, thumb is wide but a bit shorter, and pinky is the smallest overall.
 export const FINGER_WIDTH_SCALE: Record<FingerId, number> = {
-  thumb: 1.22,
-  index: 1,
+  thumb: 1.2,
+  index: 0.94,
   middle: 1,
-  ring: 1,
+  ring: 0.92,
   pinky: 0.72,
 };
 
 export const FINGER_HEIGHT_SCALE: Record<FingerId, number> = {
-  thumb: 1,
-  index: 1,
+  thumb: 0.88,
+  index: 0.94,
   middle: 1,
-  ring: 1,
+  ring: 0.96,
   pinky: 0.72,
 };
 
