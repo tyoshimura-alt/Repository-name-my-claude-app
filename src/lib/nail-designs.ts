@@ -64,7 +64,7 @@ export const FINGER_WIDTH_SCALE: Record<FingerId, number> = {
   index: 1,
   middle: 1,
   ring: 1,
-  pinky: 0.85,
+  pinky: 0.72,
 };
 
 export const FINGER_HEIGHT_SCALE: Record<FingerId, number> = {
@@ -72,7 +72,7 @@ export const FINGER_HEIGHT_SCALE: Record<FingerId, number> = {
   index: 1,
   middle: 1,
   ring: 1,
-  pinky: 0.85,
+  pinky: 0.72,
 };
 
 export type NailShape =
