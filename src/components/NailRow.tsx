@@ -80,7 +80,10 @@ function HandRow({
                 active ? "border-pink-500 bg-pink-50" : "border-gray-200 bg-white hover:border-pink-300"
               }`}
             >
-              <div style={{ height: containerHeight }} className="w-full flex flex-col items-center justify-end">
+              <div
+                style={{ height: containerHeight }}
+                className="w-full flex flex-col items-center justify-end rounded-md bg-gray-50"
+              >
                 <svg
                   width={width}
                   height={height}
