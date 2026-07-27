@@ -56,6 +56,8 @@ function randomDesign(): NailDesign {
   };
 }
 
+type PlacementMode = "point" | "line" | "arc";
+
 function pickDesign(d: NailDesign): NailDesign {
   return {
     shape: d.shape,
@@ -76,6 +78,18 @@ export default function Home() {
   const [pendingPartShape, setPendingPartShape] = useState<PartShape>("heart");
   const [pendingPartColor, setPendingPartColor] = useState("#E85C8A");
   const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
+  const [placementMode, setPlacementMode] = useState<PlacementMode>("point");
+  const [lineStartPoint, setLineStartPoint] = useState<{ x: number; y: number } | null>(null);
+
+  function changePlacementMode(mode: PlacementMode) {
+    setPlacementMode(mode);
+    setLineStartPoint(null);
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLineStartPoint(null);
+  }, [activeNail]);
 
   useEffect(() => {
     try {
@@ -126,6 +140,65 @@ export default function Home() {
     setSelectedPartId(newPart.id);
   }
 
+  function addPartsAlongLine(
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    mode: PlacementMode
+  ) {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const dist = Math.hypot(dx, dy);
+    const spacing = 0.12;
+    const count = Math.min(10, Math.max(2, Math.round(dist / spacing) + 1));
+
+    let ctrlX = 0;
+    let ctrlY = 0;
+    if (mode === "arc") {
+      const midX = (start.x + end.x) / 2;
+      const midY = (start.y + end.y) / 2;
+      const len = dist || 1;
+      const nx = -dy / len;
+      const ny = dx / len;
+      const bulge = 0.3 * dist;
+      // Always bulge toward smaller y (visually "up") regardless of line direction.
+      const candidateAY = midY + ny * bulge;
+      const candidateBY = midY - ny * bulge;
+      const useNegative = candidateBY < candidateAY;
+      ctrlX = midX + (useNegative ? -nx : nx) * bulge;
+      ctrlY = midY + (useNegative ? -ny : ny) * bulge;
+    }
+
+    const newParts: PlacedPart[] = [];
+    for (let i = 0; i < count; i++) {
+      const t = count === 1 ? 0 : i / (count - 1);
+      let x: number;
+      let y: number;
+      let tangentX: number;
+      let tangentY: number;
+      if (mode === "arc") {
+        x = (1 - t) ** 2 * start.x + 2 * (1 - t) * t * ctrlX + t ** 2 * end.x;
+        y = (1 - t) ** 2 * start.y + 2 * (1 - t) * t * ctrlY + t ** 2 * end.y;
+        tangentX = 2 * (1 - t) * (ctrlX - start.x) + 2 * t * (end.x - ctrlX);
+        tangentY = 2 * (1 - t) * (ctrlY - start.y) + 2 * t * (end.y - ctrlY);
+      } else {
+        x = start.x + dx * t;
+        y = start.y + dy * t;
+        tangentX = dx;
+        tangentY = dy;
+      }
+      const rotationDeg = (Math.atan2(tangentY, tangentX) * 180) / Math.PI;
+      newParts.push({
+        id: `part-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 5)}`,
+        shape: pendingPartShape,
+        x,
+        y,
+        rotation: ((rotationDeg % 360) + 360) % 360,
+        color: pendingPartColor,
+      });
+    }
+    patchDesign({ parts: [...(displayedDesign.parts ?? []), ...newParts] });
+  }
+
   function updatePart(id: string, patch: Partial<PlacedPart>) {
     patchDesign({
       parts: (displayedDesign.parts ?? []).map((p) => (p.id === id ? { ...p, ...patch } : p)),
@@ -141,6 +214,17 @@ export default function Home() {
     const rect = e.currentTarget.getBoundingClientRect();
     const fracX = (e.clientX - rect.left) / rect.width;
     const fracY = (e.clientY - rect.top) / rect.height;
+
+    if (placementMode !== "point") {
+      if (!lineStartPoint) {
+        setLineStartPoint({ x: fracX, y: fracY });
+      } else {
+        addPartsAlongLine(lineStartPoint, { x: fracX, y: fracY }, placementMode);
+        setLineStartPoint(null);
+      }
+      return;
+    }
+
     const hit = (displayedDesign.parts ?? []).find(
       (p) => Math.hypot(p.x - fracX, p.y - fracY) < 0.06
     );
@@ -348,6 +432,9 @@ export default function Home() {
               onSelectPart={setSelectedPartId}
               onUpdatePart={updatePart}
               onDeletePart={deletePart}
+              placementMode={placementMode}
+              onPlacementModeChange={changePlacementMode}
+              lineStartPending={lineStartPoint !== null}
             />
           </div>
         </section>

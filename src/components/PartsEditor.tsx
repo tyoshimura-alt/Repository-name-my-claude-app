@@ -5,6 +5,14 @@ import {
   PartShape,
 } from "@/lib/nail-designs";
 
+type PlacementMode = "point" | "line" | "arc";
+
+const PLACEMENT_MODE_LABELS: Record<PlacementMode, string> = {
+  point: "点",
+  line: "直線",
+  arc: "アーチ",
+};
+
 interface PartsEditorProps {
   parts: PlacedPart[];
   pendingShape: PartShape;
@@ -15,6 +23,9 @@ interface PartsEditorProps {
   onSelectPart: (id: string | null) => void;
   onUpdatePart: (id: string, patch: Partial<PlacedPart>) => void;
   onDeletePart: (id: string) => void;
+  placementMode: PlacementMode;
+  onPlacementModeChange: (mode: PlacementMode) => void;
+  lineStartPending: boolean;
 }
 
 export default function PartsEditor({
@@ -27,6 +38,9 @@ export default function PartsEditor({
   onSelectPart,
   onUpdatePart,
   onDeletePart,
+  placementMode,
+  onPlacementModeChange,
+  lineStartPending,
 }: PartsEditorProps) {
   const selectedPart = parts.find((p) => p.id === selectedPartId) ?? null;
 
@@ -34,7 +48,39 @@ export default function PartsEditor({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-700">パーツ</h3>
-        <p className="text-[11px] text-gray-400">爪をクリックして配置</p>
+        <p className="text-[11px] text-gray-400">
+          {placementMode === "point"
+            ? "爪をクリックして配置"
+            : lineStartPending
+              ? "終点をクリック"
+              : "始点をクリック"}
+        </p>
+      </div>
+
+      <div>
+        <p className="text-xs font-medium text-gray-500 mb-1.5">配置方法</p>
+        <div className="grid grid-cols-3 gap-2">
+          {(Object.keys(PLACEMENT_MODE_LABELS) as PlacementMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => onPlacementModeChange(mode)}
+              className={`rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
+                placementMode === mode
+                  ? "border-pink-500 bg-pink-50 text-pink-700"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-pink-300"
+              }`}
+            >
+              {PLACEMENT_MODE_LABELS[mode]}
+            </button>
+          ))}
+        </div>
+        {placementMode !== "point" && (
+          <p className="text-[11px] text-gray-400 mt-1.5">
+            {lineStartPending
+              ? "続けて終点をクリックすると、その間にパーツが並びます。"
+              : "始点と終点の2箇所をクリックすると、その間にパーツが並びます。"}
+          </p>
+        )}
       </div>
 
       <div>
