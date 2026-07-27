@@ -1,5 +1,7 @@
 import {
   COLOR_SWATCHES,
+  LENGTH_LABELS,
+  NAIL_LENGTHS,
   NAIL_PATTERNS,
   NAIL_SHAPES,
   NailDesign,
@@ -31,6 +33,25 @@ export default function DesignControls({ design, onChange }: DesignControlsProps
               }`}
             >
               {NAIL_SHAPES[key].label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">爪の長さ</h3>
+        <div className="grid grid-cols-5 gap-2">
+          {NAIL_LENGTHS.map((level) => (
+            <button
+              key={level}
+              onClick={() => onChange({ length: level })}
+              className={`rounded-lg border px-1 py-2 text-[11px] font-medium transition-colors ${
+                design.length === level
+                  ? "border-pink-500 bg-pink-50 text-pink-700"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-pink-300"
+              }`}
+            >
+              {LENGTH_LABELS[level]}
             </button>
           ))}
         </div>

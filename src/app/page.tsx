@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react";
 import {
   DEFAULT_DESIGN,
-  FINGER_IDS,
-  FINGER_LABELS,
-  FingerId,
+  HANDS,
+  NAIL_IDS,
   NAIL_PATTERNS,
   NAIL_SHAPES,
   NailDesign,
+  NailId,
   NailPattern,
   NailShape,
   PRESETS,
+  nailBoxSize,
+  nailLabel,
 } from "@/lib/nail-designs";
 import NailGraphic from "@/components/NailGraphic";
 import NailRow from "@/components/NailRow";
@@ -24,7 +26,7 @@ interface Favorite {
   id: string;
   name: string;
   savedAt: number;
-  fingers: Record<FingerId, NailDesign>;
+  nails: Record<NailId, NailDesign>;
 }
 
 function randomFrom<T>(arr: T[]): T {
@@ -40,6 +42,7 @@ function randomDesign(): NailDesign {
     baseColor: preset.baseColor,
     pattern: randomFrom(patterns),
     accentColor: preset.accentColor,
+    length: randomFrom([1, 2, 3, 4, 5]),
   };
 }
 
@@ -49,13 +52,14 @@ function pickDesign(d: NailDesign): NailDesign {
     baseColor: d.baseColor,
     pattern: d.pattern,
     accentColor: d.accentColor,
+    length: d.length,
   };
 }
 
 export default function Home() {
   const [template, setTemplate] = useState<NailDesign>(DEFAULT_DESIGN);
-  const [overrides, setOverrides] = useState<Partial<Record<FingerId, NailDesign>>>({});
-  const [activeFinger, setActiveFinger] = useState<FingerId | "all">("all");
+  const [overrides, setOverrides] = useState<Partial<Record<NailId, NailDesign>>>({});
+  const [activeNail, setActiveNail] = useState<NailId | "all">("all");
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -75,53 +79,53 @@ export default function Home() {
     if (loaded) localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
   }, [favorites, loaded]);
 
-  function effectiveDesign(id: FingerId): NailDesign {
+  function effectiveDesign(id: NailId): NailDesign {
     return overrides[id] ?? template;
   }
 
-  const fingerDesigns = Object.fromEntries(
-    FINGER_IDS.map((id) => [id, effectiveDesign(id)])
-  ) as Record<FingerId, NailDesign>;
+  const nailDesigns = Object.fromEntries(
+    NAIL_IDS.map((id) => [id, effectiveDesign(id)])
+  ) as Record<NailId, NailDesign>;
 
-  const displayedDesign = activeFinger === "all" ? template : effectiveDesign(activeFinger);
+  const displayedDesign = activeNail === "all" ? template : effectiveDesign(activeNail);
 
   function patchDesign(patch: Partial<NailDesign>) {
-    if (activeFinger === "all") {
+    if (activeNail === "all") {
       setTemplate((t) => ({ ...t, ...patch }));
       setOverrides({});
     } else {
-      const finger = activeFinger;
-      setOverrides((o) => ({ ...o, [finger]: { ...effectiveDesign(finger), ...patch } }));
+      const id = activeNail;
+      setOverrides((o) => ({ ...o, [id]: { ...effectiveDesign(id), ...patch } }));
     }
   }
 
   function applyDesign(d: NailDesign) {
-    if (activeFinger === "all") {
+    if (activeNail === "all") {
       setTemplate(pickDesign(d));
       setOverrides({});
     } else {
-      setOverrides((o) => ({ ...o, [activeFinger]: pickDesign(d) }));
+      setOverrides((o) => ({ ...o, [activeNail]: pickDesign(d) }));
     }
   }
 
   function shuffle() {
-    if (activeFinger === "all") {
-      const next: Partial<Record<FingerId, NailDesign>> = {};
-      FINGER_IDS.forEach((id) => {
+    if (activeNail === "all") {
+      const next: Partial<Record<NailId, NailDesign>> = {};
+      NAIL_IDS.forEach((id) => {
         next[id] = randomDesign();
       });
       setOverrides(next);
-      setTemplate(next.index!);
+      setTemplate(next.left_index!);
     } else {
-      const finger = activeFinger;
-      setOverrides((o) => ({ ...o, [finger]: randomDesign() }));
+      const id = activeNail;
+      setOverrides((o) => ({ ...o, [id]: randomDesign() }));
     }
   }
 
   function resetAll() {
     setTemplate(DEFAULT_DESIGN);
     setOverrides({});
-    setActiveFinger("all");
+    setActiveNail("all");
   }
 
   function saveFavorite() {
@@ -130,21 +134,22 @@ export default function Home() {
       id: `fav-${Date.now()}`,
       name,
       savedAt: Date.now(),
-      fingers: fingerDesigns,
+      nails: nailDesigns,
     };
     setFavorites((prev) => [fav, ...prev]);
   }
 
   function loadFavorite(fav: Favorite) {
-    setOverrides(fav.fingers);
-    setTemplate(fav.fingers.index);
-    setActiveFinger("all");
+    setOverrides(fav.nails);
+    setTemplate(fav.nails.left_index);
+    setActiveNail("all");
   }
 
   function removeFavorite(id: string) {
     setFavorites((prev) => prev.filter((f) => f.id !== id));
   }
 
+  const bigBox = nailBoxSize(displayedDesign.shape, 160, displayedDesign.length);
   const bigDef = NAIL_SHAPES[displayedDesign.shape];
 
   return (
@@ -190,30 +195,34 @@ export default function Home() {
               <p className="text-xs font-medium text-gray-500 mb-1.5">編集する爪</p>
               <div className="flex flex-wrap gap-1.5">
                 <button
-                  onClick={() => setActiveFinger("all")}
+                  onClick={() => setActiveNail("all")}
                   className={`text-xs font-medium rounded-full px-3 py-1.5 border transition-colors ${
-                    activeFinger === "all"
+                    activeNail === "all"
                       ? "bg-pink-600 border-pink-600 text-white"
                       : "border-gray-200 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   全部
                 </button>
-                {FINGER_IDS.map((id) => (
-                  <button
-                    key={id}
-                    onClick={() => setActiveFinger(id)}
-                    className={`text-xs font-medium rounded-full px-3 py-1.5 border transition-colors ${
-                      activeFinger === id
-                        ? "bg-pink-600 border-pink-600 text-white"
-                        : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {FINGER_LABELS[id]}
-                  </button>
+                {HANDS.map((hand) => (
+                  <span key={hand} className="flex flex-wrap gap-1.5">
+                    {NAIL_IDS.filter((id) => id.startsWith(`${hand}_`)).map((id) => (
+                      <button
+                        key={id}
+                        onClick={() => setActiveNail(id)}
+                        className={`text-xs font-medium rounded-full px-3 py-1.5 border transition-colors ${
+                          activeNail === id
+                            ? "bg-pink-600 border-pink-600 text-white"
+                            : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                        }`}
+                      >
+                        {nailLabel(id)}
+                      </button>
+                    ))}
+                  </span>
                 ))}
               </div>
-              {activeFinger === "all" && (
+              {activeNail === "all" && (
                 <p className="text-[11px] text-gray-400 mt-1.5">
                   「全部」を選んでいる間は、変更するとすべての爪に反映されます。1本ずつ変えたいときは上のタブか、下のプレビューの爪を直接タップしてください。
                 </p>
@@ -221,14 +230,20 @@ export default function Home() {
             </div>
 
             <NailRow
-              fingerDesigns={fingerDesigns}
-              activeFinger={activeFinger}
-              onSelectFinger={setActiveFinger}
+              nailDesigns={nailDesigns}
+              activeNail={activeNail}
+              onSelectNail={setActiveNail}
             />
 
             <div className="flex justify-center">
-              <div className="w-28 h-40">
-                <svg viewBox={bigDef.viewBox} className="w-full h-full drop-shadow">
+              <div style={{ width: bigBox.width, height: bigBox.height }} className="flex items-end">
+                <svg
+                  viewBox={bigDef.viewBox}
+                  preserveAspectRatio="none"
+                  width={bigBox.width}
+                  height={bigBox.height}
+                  className="drop-shadow"
+                >
                   <NailGraphic uid="big-preview" {...displayedDesign} />
                 </svg>
               </div>
@@ -251,7 +266,7 @@ export default function Home() {
               プレビューの「♥ 保存」ボタンで、気に入ったデザインをここに保存できます。
             </p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {favorites.map((fav) => (
                 <div
                   key={fav.id}
@@ -268,16 +283,20 @@ export default function Home() {
                   >
                     ✕
                   </button>
-                  <div className="h-16 flex items-center justify-center gap-1">
-                    {FINGER_IDS.map((id) => {
-                      const d = fav.fingers[id];
-                      const def = NAIL_SHAPES[d.shape];
-                      return (
-                        <svg key={id} viewBox={def.viewBox} className="h-full">
-                          <NailGraphic uid={`fav-${fav.id}-${id}`} {...d} />
-                        </svg>
-                      );
-                    })}
+                  <div className="space-y-1">
+                    {HANDS.map((hand) => (
+                      <div key={hand} className="h-10 flex items-center justify-center gap-1">
+                        {NAIL_IDS.filter((id) => id.startsWith(`${hand}_`)).map((id) => {
+                          const d = fav.nails[id];
+                          const def = NAIL_SHAPES[d.shape];
+                          return (
+                            <svg key={id} viewBox={def.viewBox} className="h-full">
+                              <NailGraphic uid={`fav-${fav.id}-${id}`} {...d} />
+                            </svg>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                   <p className="mt-2 text-xs font-medium text-gray-700 text-center truncate">
                     {fav.name}

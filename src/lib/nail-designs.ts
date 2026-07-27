@@ -10,6 +10,53 @@ export const FINGER_LABELS: Record<FingerId, string> = {
   pinky: "小指",
 };
 
+export type Hand = "left" | "right";
+
+export const HANDS: Hand[] = ["left", "right"];
+
+export const HAND_LABELS: Record<Hand, string> = {
+  left: "左手",
+  right: "右手",
+};
+
+export type NailId = `${Hand}_${FingerId}`;
+
+export const NAIL_IDS: NailId[] = HANDS.flatMap((hand) =>
+  FINGER_IDS.map((finger) => `${hand}_${finger}` as NailId)
+);
+
+export function nailHand(id: NailId): Hand {
+  return id.split("_")[0] as Hand;
+}
+
+export function nailFinger(id: NailId): FingerId {
+  return id.split("_")[1] as FingerId;
+}
+
+export function nailLabel(id: NailId): string {
+  return `${HAND_LABELS[nailHand(id)]}${FINGER_LABELS[nailFinger(id)]}`;
+}
+
+export const NAIL_LENGTHS = [1, 2, 3, 4, 5] as const;
+
+export const LENGTH_LABELS: Record<number, string> = {
+  1: "短め",
+  2: "やや短め",
+  3: "標準",
+  4: "やや長め",
+  5: "長め",
+};
+
+// Visual height multiplier applied to a nail's rendered box (width stays fixed) so a
+// higher length level looks like a longer nail without redrawing the shape path.
+export const LENGTH_SCALE: Record<number, number> = {
+  1: 0.62,
+  2: 0.8,
+  3: 1,
+  4: 1.2,
+  5: 1.42,
+};
+
 export type NailShape =
   | "round"
   | "square"
@@ -66,6 +113,23 @@ export const NAIL_SHAPES: Record<NailShape, ShapeDef> = {
   },
 };
 
+/**
+ * Box size for one nail preview at a given neutral (length 3) height. Width is derived from
+ * the shape's natural aspect ratio and stays fixed across length levels; only height scales,
+ * so a longer nail reads as "grew taller" rather than "got wider".
+ */
+export function nailBoxSize(
+  shape: NailShape,
+  neutralHeight: number,
+  length: number
+): { width: number; height: number } {
+  const [, , vbW, vbH] = NAIL_SHAPES[shape].viewBox.split(" ").map(Number);
+  return {
+    width: neutralHeight * (vbW / vbH),
+    height: neutralHeight * (LENGTH_SCALE[length] ?? 1),
+  };
+}
+
 export interface PatternDef {
   label: string;
   needsAccent: boolean;
@@ -86,6 +150,7 @@ export interface NailDesign {
   baseColor: string;
   pattern: NailPattern;
   accentColor: string;
+  length: number;
 }
 
 export interface DesignPreset extends NailDesign {
@@ -114,6 +179,7 @@ export const DEFAULT_DESIGN: NailDesign = {
   baseColor: "#E8C4A0",
   pattern: "solid",
   accentColor: "#FFFFFF",
+  length: 3,
 };
 
 export const PRESETS: DesignPreset[] = [
@@ -124,6 +190,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#E8C4A0",
     pattern: "solid",
     accentColor: "#FFFFFF",
+    length: 3,
     tags: ["オフィス", "シンプル"],
   },
   {
@@ -133,6 +200,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#F5DFC8",
     pattern: "french",
     accentColor: "#FFFFFF",
+    length: 3,
     tags: ["定番", "フォーマル"],
   },
   {
@@ -142,6 +210,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#C21E33",
     pattern: "solid",
     accentColor: "#FFFFFF",
+    length: 3,
     tags: ["赤", "モード"],
   },
   {
@@ -151,6 +220,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#F7B8D0",
     pattern: "glitter",
     accentColor: "#FFD9E8",
+    length: 3,
     tags: ["キラキラ", "パーティー"],
   },
   {
@@ -160,6 +230,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FFD700",
     pattern: "gradient",
     accentColor: "#FFF6C8",
+    length: 3,
     tags: ["グラデ", "華やか"],
   },
   {
@@ -169,6 +240,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#A9C4D8",
     pattern: "dots",
     accentColor: "#FFFFFF",
+    length: 3,
     tags: ["ドット", "カジュアル"],
   },
   {
@@ -178,6 +250,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#E6D2B5",
     pattern: "marble",
     accentColor: "#C79A6B",
+    length: 3,
     tags: ["マーブル", "上品"],
   },
   {
@@ -187,6 +260,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FFFFFF",
     pattern: "stripes",
     accentColor: "#222222",
+    length: 3,
     tags: ["モノトーン", "モード"],
   },
   {
@@ -196,6 +270,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#6B0F1A",
     pattern: "solid",
     accentColor: "#FFFFFF",
+    length: 3,
     tags: ["赤", "個性的"],
   },
   {
@@ -205,6 +280,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FF7E5F",
     pattern: "gradient",
     accentColor: "#FEB47B",
+    length: 3,
     tags: ["グラデ", "夏"],
   },
   {
@@ -214,6 +290,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#D8C7EC",
     pattern: "solid",
     accentColor: "#FFFFFF",
+    length: 3,
     tags: ["パステル", "春"],
   },
   {
@@ -223,6 +300,7 @@ export const PRESETS: DesignPreset[] = [
     baseColor: "#FFFFFF",
     pattern: "glitter",
     accentColor: "#E0E0E0",
+    length: 3,
     tags: ["キラキラ", "上品"],
   },
 ];
