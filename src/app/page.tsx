@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  COLOR_SWATCHES,
   DEFAULT_DESIGN,
   HANDS,
   NAIL_IDS,
@@ -37,12 +38,16 @@ function randomFrom<T>(arr: T[]): T {
 function randomDesign(): NailDesign {
   const shapes = Object.keys(NAIL_SHAPES) as NailShape[];
   const patterns = Object.keys(NAIL_PATTERNS) as NailPattern[];
-  const preset = randomFrom(PRESETS);
+  const baseColor = randomFrom(COLOR_SWATCHES);
+  let accentColor = randomFrom(COLOR_SWATCHES);
+  if (accentColor === baseColor) {
+    accentColor = baseColor === "#FFFFFF" ? "#222222" : "#FFFFFF";
+  }
   return {
     shape: randomFrom(shapes),
-    baseColor: preset.baseColor,
+    baseColor,
     pattern: randomFrom(patterns),
-    accentColor: preset.accentColor,
+    accentColor,
     length: randomFrom([1, 2, 3, 4, 5]),
   };
 }

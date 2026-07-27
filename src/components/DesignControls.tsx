@@ -105,7 +105,7 @@ export default function DesignControls({ design, onChange }: DesignControlsProps
         <section>
           <h3 className="text-sm font-semibold text-gray-700 mb-2">アクセントカラー</h3>
           <div className="flex flex-wrap gap-2 mb-2">
-            {Array.from(new Set(["#FFFFFF", "#222222", ...COLOR_SWATCHES])).slice(0, 10).map((c) => (
+            {Array.from(new Set(["#FFFFFF", "#222222", ...COLOR_SWATCHES])).map((c) => (
               <button
                 key={c}
                 onClick={() => onChange({ accentColor: c })}

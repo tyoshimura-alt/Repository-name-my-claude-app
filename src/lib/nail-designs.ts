@@ -181,19 +181,26 @@ export interface DesignPreset extends NailDesign {
   tags: string[];
 }
 
+// Spread across the full color wheel (not just nude/pink/red) so random shuffles
+// and the swatch picker don't cluster on one or two hue families.
 export const COLOR_SWATCHES: string[] = [
-  "#E8C4A0",
-  "#F5DFC8",
-  "#C21E33",
-  "#F7B8D0",
-  "#FFD9E8",
-  "#A9C4D8",
-  "#E6D2B5",
-  "#FFFFFF",
-  "#222222",
-  "#6B0F1A",
-  "#FF7E5F",
-  "#D8C7EC",
+  "#E8C4A0", // nude
+  "#E6D2B5", // tan / beige
+  "#F7B8D0", // soft pink
+  "#FFD9E8", // pale pink
+  "#E85C8A", // hot pink / magenta
+  "#C21E33", // red
+  "#6B0F1A", // burgundy
+  "#FF7E5F", // coral
+  "#E8A23D", // mustard / amber
+  "#7FB069", // sage green
+  "#4FA89B", // teal
+  "#A9C4D8", // dusty blue
+  "#34506B", // navy
+  "#7B5EA7", // deep purple
+  "#D8C7EC", // lavender
+  "#FFFFFF", // white
+  "#222222", // black
 ];
 
 export const DEFAULT_DESIGN: NailDesign = {
