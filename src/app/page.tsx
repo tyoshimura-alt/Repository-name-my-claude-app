@@ -14,6 +14,8 @@ import {
   NailPattern,
   NailShape,
   PRESETS,
+  PlacedPart,
+  PartShape,
   nailBoxSize,
   nailFinger,
   nailLabel,
@@ -21,6 +23,7 @@ import {
 import NailGraphic from "@/components/NailGraphic";
 import NailRow from "@/components/NailRow";
 import DesignControls from "@/components/DesignControls";
+import PartsEditor from "@/components/PartsEditor";
 import Catalog from "@/components/Catalog";
 
 const FAVORITES_KEY = "nail-app-favorites";
@@ -60,7 +63,7 @@ function pickDesign(d: NailDesign): NailDesign {
     pattern: d.pattern,
     accentColor: d.accentColor,
     length: d.length,
-    parts: d.parts ?? "none",
+    parts: d.parts ?? [],
   };
 }
 
@@ -70,6 +73,9 @@ export default function Home() {
   const [activeNail, setActiveNail] = useState<NailId | "all">("all");
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [pendingPartShape, setPendingPartShape] = useState<PartShape>("heart");
+  const [pendingPartColor, setPendingPartColor] = useState("#E85C8A");
+  const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -104,6 +110,44 @@ export default function Home() {
     } else {
       const id = activeNail;
       setOverrides((o) => ({ ...o, [id]: { ...effectiveDesign(id), ...patch } }));
+    }
+  }
+
+  function addPart(x: number, y: number) {
+    const newPart: PlacedPart = {
+      id: `part-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      shape: pendingPartShape,
+      x,
+      y,
+      rotation: 0,
+      color: pendingPartColor,
+    };
+    patchDesign({ parts: [...(displayedDesign.parts ?? []), newPart] });
+    setSelectedPartId(newPart.id);
+  }
+
+  function updatePart(id: string, patch: Partial<PlacedPart>) {
+    patchDesign({
+      parts: (displayedDesign.parts ?? []).map((p) => (p.id === id ? { ...p, ...patch } : p)),
+    });
+  }
+
+  function deletePart(id: string) {
+    patchDesign({ parts: (displayedDesign.parts ?? []).filter((p) => p.id !== id) });
+    if (selectedPartId === id) setSelectedPartId(null);
+  }
+
+  function handleBigPreviewClick(e: React.MouseEvent<SVGSVGElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const fracX = (e.clientX - rect.left) / rect.width;
+    const fracY = (e.clientY - rect.top) / rect.height;
+    const hit = (displayedDesign.parts ?? []).find(
+      (p) => Math.hypot(p.x - fracX, p.y - fracY) < 0.06
+    );
+    if (hit) {
+      setSelectedPartId(hit.id);
+    } else {
+      addPart(fracX, fracY);
     }
   }
 
@@ -283,7 +327,8 @@ export default function Home() {
                   preserveAspectRatio="none"
                   width={bigBox.width}
                   height={bigBox.height}
-                  className="drop-shadow"
+                  className="drop-shadow cursor-crosshair"
+                  onClick={handleBigPreviewClick}
                 >
                   <NailGraphic uid="big-preview" {...displayedDesign} />
                 </svg>
@@ -291,8 +336,19 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-pink-100 bg-white shadow-sm p-4">
+          <div className="rounded-2xl border border-pink-100 bg-white shadow-sm p-4 space-y-6">
             <DesignControls design={displayedDesign} onChange={patchDesign} />
+            <PartsEditor
+              parts={displayedDesign.parts ?? []}
+              pendingShape={pendingPartShape}
+              onPendingShapeChange={setPendingPartShape}
+              pendingColor={pendingPartColor}
+              onPendingColorChange={setPendingPartColor}
+              selectedPartId={selectedPartId}
+              onSelectPart={setSelectedPartId}
+              onUpdatePart={updatePart}
+              onDeletePart={deletePart}
+            />
           </div>
         </section>
 

@@ -175,19 +175,48 @@ export const NAIL_PATTERNS: Record<NailPattern, PatternDef> = {
   checker: { label: "チェック", needsAccent: true },
 };
 
-export type NailPart = "none" | "rhinestone" | "pearl" | "stud" | "charm";
+export type PartShape = "heart" | "star" | "ribbon" | "flower" | "cross" | "dot";
 
-export interface PartDef {
-  label: string;
-}
-
-export const NAIL_PARTS: Record<NailPart, PartDef> = {
-  none: { label: "なし" },
-  rhinestone: { label: "ラインストーン" },
-  pearl: { label: "パール" },
-  stud: { label: "スタッズ" },
-  charm: { label: "チャーム" },
+export const PART_SHAPE_LABELS: Record<PartShape, string> = {
+  heart: "ハート",
+  star: "星",
+  ribbon: "リボン",
+  flower: "フラワー",
+  cross: "クロス",
+  dot: "丸", // "ドット" is avoided here since the pattern picker already has a "ドット" (polka-dot) option
 };
+
+// Unit-sized (roughly -3..3) SVG path data centered on the origin, for shapes
+// rendered as a single <path>. "dot" is handled separately as a plain <circle>
+// since a circle needs no path data.
+export const PART_SHAPE_PATHS: Partial<Record<PartShape, string>> = {
+  heart:
+    "M0,3 C-1.2,1.3 -3,1 -3,-1 C-3,-2.6 -1.6,-3.6 0,-1.8 C1.6,-3.6 3,-2.6 3,-1 C3,1 1.2,1.3 0,3 Z",
+  star:
+    "M0,-3.2 L0.75,-1.1 L3.1,-1.1 L1.2,0.4 L1.9,2.8 L0,1.3 L-1.9,2.8 L-1.2,0.4 L-3.1,-1.1 L-0.75,-1.1 Z",
+  cross:
+    "M-0.7,-2.4 L0.7,-2.4 L0.7,-0.7 L2.4,-0.7 L2.4,0.7 L0.7,0.7 L0.7,2.4 L-0.7,2.4 L-0.7,0.7 L-2.4,0.7 L-2.4,-0.7 L-0.7,-0.7 Z",
+  ribbon:
+    "M-3,-2 L-0.3,0 L-3,2 Z M3,-2 L0.3,0 L3,2 Z M-0.5,-0.8 L0.5,-0.8 L0.5,0.8 L-0.5,0.8 Z",
+  flower:
+    "M-1.15,-1.3 A1.15,1.15 0 1,0 1.15,-1.3 A1.15,1.15 0 1,0 -1.15,-1.3 Z " +
+    "M0.09,-0.4 A1.15,1.15 0 1,0 2.39,-0.4 A1.15,1.15 0 1,0 0.09,-0.4 Z " +
+    "M-0.39,1.05 A1.15,1.15 0 1,0 1.91,1.05 A1.15,1.15 0 1,0 -0.39,1.05 Z " +
+    "M-1.91,1.05 A1.15,1.15 0 1,0 0.39,1.05 A1.15,1.15 0 1,0 -1.91,1.05 Z " +
+    "M-2.39,-0.4 A1.15,1.15 0 1,0 -0.09,-0.4 A1.15,1.15 0 1,0 -2.39,-0.4 Z",
+};
+
+export interface PlacedPart {
+  id: string;
+  shape: PartShape;
+  /** Fraction (0-1) of the nail shape's own viewBox width. */
+  x: number;
+  /** Fraction (0-1) of the nail shape's own viewBox height. */
+  y: number;
+  /** Degrees. */
+  rotation: number;
+  color: string;
+}
 
 export interface NailDesign {
   shape: NailShape;
@@ -195,7 +224,7 @@ export interface NailDesign {
   pattern: NailPattern;
   accentColor: string;
   length: number;
-  parts?: NailPart;
+  parts?: PlacedPart[];
 }
 
 export interface DesignPreset extends NailDesign {
@@ -371,31 +400,6 @@ export const PRESETS: DesignPreset[] = [
     length: 3,
     tags: ["キラキラ", "上品"],
   },
-];
-
-// "Parts" decoration positions are expressed as fractions of the shape's own
-// viewBox width/height (not absolute px) so they land in the same relative
-// spot — a small cluster near the cuticle — regardless of which shape/viewBox
-// is active.
-export const RHINESTONE_DOTS: { x: number; y: number; r: number }[] = [
-  { x: 0.42, y: 0.9, r: 3.2 },
-  { x: 0.52, y: 0.86, r: 2.6 },
-  { x: 0.35, y: 0.85, r: 2.2 },
-  { x: 0.6, y: 0.9, r: 2.4 },
-  { x: 0.48, y: 0.95, r: 2.0 },
-];
-
-export const PEARL_DOTS: { x: number; y: number; r: number }[] = [
-  { x: 0.38, y: 0.9, r: 4.2 },
-  { x: 0.5, y: 0.87, r: 4.6 },
-  { x: 0.62, y: 0.9, r: 4.2 },
-];
-
-export const STUD_DOTS: { x: number; y: number }[] = [
-  { x: 0.4, y: 0.9 },
-  { x: 0.5, y: 0.84 },
-  { x: 0.6, y: 0.9 },
-  { x: 0.5, y: 0.96 },
 ];
 
 export const GLITTER_DOTS: { cx: number; cy: number; r: number; o: number }[] = [

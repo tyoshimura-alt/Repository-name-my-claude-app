@@ -2,11 +2,9 @@ import {
   COLOR_SWATCHES,
   LENGTH_LABELS,
   NAIL_LENGTHS,
-  NAIL_PARTS,
   NAIL_PATTERNS,
   NAIL_SHAPES,
   NailDesign,
-  NailPart,
   NailPattern,
   NailShape,
 } from "@/lib/nail-designs";
@@ -129,25 +127,6 @@ export default function DesignControls({ design, onChange }: DesignControlsProps
           />
         </section>
       )}
-
-      <section>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">パーツ</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {(Object.keys(NAIL_PARTS) as NailPart[]).map((key) => (
-            <button
-              key={key}
-              onClick={() => onChange({ parts: key })}
-              className={`rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
-                (design.parts ?? "none") === key
-                  ? "border-pink-500 bg-pink-50 text-pink-700"
-                  : "border-gray-200 bg-white text-gray-600 hover:border-pink-300"
-              }`}
-            >
-              {NAIL_PARTS[key].label}
-            </button>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
