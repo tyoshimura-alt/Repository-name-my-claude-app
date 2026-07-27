@@ -175,12 +175,27 @@ export const NAIL_PATTERNS: Record<NailPattern, PatternDef> = {
   checker: { label: "チェック", needsAccent: true },
 };
 
+export type NailPart = "none" | "rhinestone" | "pearl" | "stud" | "charm";
+
+export interface PartDef {
+  label: string;
+}
+
+export const NAIL_PARTS: Record<NailPart, PartDef> = {
+  none: { label: "なし" },
+  rhinestone: { label: "ラインストーン" },
+  pearl: { label: "パール" },
+  stud: { label: "スタッズ" },
+  charm: { label: "チャーム" },
+};
+
 export interface NailDesign {
   shape: NailShape;
   baseColor: string;
   pattern: NailPattern;
   accentColor: string;
   length: number;
+  parts?: NailPart;
 }
 
 export interface DesignPreset extends NailDesign {
@@ -356,6 +371,31 @@ export const PRESETS: DesignPreset[] = [
     length: 3,
     tags: ["キラキラ", "上品"],
   },
+];
+
+// "Parts" decoration positions are expressed as fractions of the shape's own
+// viewBox width/height (not absolute px) so they land in the same relative
+// spot — a small cluster near the cuticle — regardless of which shape/viewBox
+// is active.
+export const RHINESTONE_DOTS: { x: number; y: number; r: number }[] = [
+  { x: 0.42, y: 0.9, r: 3.2 },
+  { x: 0.52, y: 0.86, r: 2.6 },
+  { x: 0.35, y: 0.85, r: 2.2 },
+  { x: 0.6, y: 0.9, r: 2.4 },
+  { x: 0.48, y: 0.95, r: 2.0 },
+];
+
+export const PEARL_DOTS: { x: number; y: number; r: number }[] = [
+  { x: 0.38, y: 0.9, r: 4.2 },
+  { x: 0.5, y: 0.87, r: 4.6 },
+  { x: 0.62, y: 0.9, r: 4.2 },
+];
+
+export const STUD_DOTS: { x: number; y: number }[] = [
+  { x: 0.4, y: 0.9 },
+  { x: 0.5, y: 0.84 },
+  { x: 0.6, y: 0.9 },
+  { x: 0.5, y: 0.96 },
 ];
 
 export const GLITTER_DOTS: { cx: number; cy: number; r: number; o: number }[] = [

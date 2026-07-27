@@ -60,6 +60,7 @@ function pickDesign(d: NailDesign): NailDesign {
     pattern: d.pattern,
     accentColor: d.accentColor,
     length: d.length,
+    parts: d.parts ?? "none",
   };
 }
 

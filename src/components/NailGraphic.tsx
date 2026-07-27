@@ -1,4 +1,11 @@
-import { GLITTER_DOTS, NAIL_SHAPES, NailDesign } from "@/lib/nail-designs";
+import {
+  GLITTER_DOTS,
+  NAIL_SHAPES,
+  NailDesign,
+  PEARL_DOTS,
+  RHINESTONE_DOTS,
+  STUD_DOTS,
+} from "@/lib/nail-designs";
 
 interface NailGraphicProps extends NailDesign {
   uid: string;
@@ -10,6 +17,7 @@ export default function NailGraphic({
   baseColor,
   pattern,
   accentColor,
+  parts = "none",
 }: NailGraphicProps) {
   const def = NAIL_SHAPES[shape];
   const clipId = `clip-${uid}`;
@@ -39,6 +47,10 @@ export default function NailGraphic({
     `M ${vbX + vbW} ${vbY} L ${vbX + vbW} ${vbY + vbH * 0.55} ` +
     `L ${vbX} ${vbY + vbH} L ${vbX} ${vbY + vbH * 0.2} Z`;
   const checkerId = `checker-${uid}`;
+
+  const charmScale = vbW * 0.045;
+  const charmX = vbX + vbW * 0.5;
+  const charmY = vbY + vbH * 0.88;
 
   return (
     <g>
@@ -147,6 +159,79 @@ export default function NailGraphic({
             />
             <path
               d={`M ${vbX + vbW * 0.75} ${vbY + vbH * 0.15} Q ${vbX + vbW * 0.55} ${vbY + vbH * 0.45} ${vbX + vbW * 0.8} ${vbY + vbH * 0.6}`}
+            />
+          </g>
+        )}
+
+        {parts === "rhinestone" &&
+          RHINESTONE_DOTS.map((p, i) => (
+            <g key={i}>
+              <circle
+                cx={vbX + p.x * vbW}
+                cy={vbY + p.y * vbH}
+                r={p.r}
+                fill="#F4F7FA"
+                stroke="#B9C8D6"
+                strokeWidth={0.6}
+              />
+              <circle
+                cx={vbX + p.x * vbW - p.r * 0.3}
+                cy={vbY + p.y * vbH - p.r * 0.3}
+                r={p.r * 0.35}
+                fill="#ffffff"
+                opacity={0.9}
+              />
+            </g>
+          ))}
+
+        {parts === "pearl" &&
+          PEARL_DOTS.map((p, i) => (
+            <g key={i}>
+              <circle
+                cx={vbX + p.x * vbW}
+                cy={vbY + p.y * vbH}
+                r={p.r}
+                fill="#F7F1E4"
+                stroke="#E3D8C2"
+                strokeWidth={0.4}
+              />
+              <ellipse
+                cx={vbX + p.x * vbW - p.r * 0.35}
+                cy={vbY + p.y * vbH - p.r * 0.4}
+                rx={p.r * 0.4}
+                ry={p.r * 0.28}
+                fill="#ffffff"
+                opacity={0.75}
+              />
+            </g>
+          ))}
+
+        {parts === "stud" &&
+          STUD_DOTS.map((p, i) => {
+            const cx = vbX + p.x * vbW;
+            const cy = vbY + p.y * vbH;
+            return (
+              <rect
+                key={i}
+                x={cx - 2.6}
+                y={cy - 2.6}
+                width={5.2}
+                height={5.2}
+                fill="#D9B65B"
+                stroke="#9C7A2E"
+                strokeWidth={0.5}
+                transform={`rotate(45 ${cx} ${cy})`}
+              />
+            );
+          })}
+
+        {parts === "charm" && (
+          <g transform={`translate(${charmX} ${charmY}) scale(${charmScale})`}>
+            <path
+              d="M0,3 C-1.2,1.3 -3,1 -3,-1 C-3,-2.6 -1.6,-3.6 0,-1.8 C1.6,-3.6 3,-2.6 3,-1 C3,1 1.2,1.3 0,3 Z"
+              fill="#E85C8A"
+              stroke="#B23A63"
+              strokeWidth={0.15}
             />
           </g>
         )}
