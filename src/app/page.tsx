@@ -111,9 +111,11 @@ export default function Home() {
 
   function shuffle() {
     if (activeNail === "all") {
+      const shapes = Object.keys(NAIL_SHAPES) as NailShape[];
+      const sharedShape = randomFrom(shapes);
       const next: Partial<Record<NailId, NailDesign>> = {};
       NAIL_IDS.forEach((id) => {
-        next[id] = randomDesign();
+        next[id] = { ...randomDesign(), shape: sharedShape };
       });
       setOverrides(next);
       setTemplate(next.left_index!);
