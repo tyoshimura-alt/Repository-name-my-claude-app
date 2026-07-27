@@ -57,6 +57,24 @@ export const LENGTH_SCALE: Record<number, number> = {
   5: 1.42,
 };
 
+// Baseline per-finger size adjustment (independent of the length control): the thumb
+// nail bed is naturally wider, the pinky nail bed is naturally smaller overall.
+export const FINGER_WIDTH_SCALE: Record<FingerId, number> = {
+  thumb: 1.22,
+  index: 1,
+  middle: 1,
+  ring: 1,
+  pinky: 0.85,
+};
+
+export const FINGER_HEIGHT_SCALE: Record<FingerId, number> = {
+  thumb: 1,
+  index: 1,
+  middle: 1,
+  ring: 1,
+  pinky: 0.85,
+};
+
 export type NailShape =
   | "round"
   | "square"
@@ -116,17 +134,21 @@ export const NAIL_SHAPES: Record<NailShape, ShapeDef> = {
 /**
  * Box size for one nail preview at a given neutral (length 3) height. Width is derived from
  * the shape's natural aspect ratio and stays fixed across length levels; only height scales,
- * so a longer nail reads as "grew taller" rather than "got wider".
+ * so a longer nail reads as "grew taller" rather than "got wider". An optional finger applies
+ * a baseline size adjustment (thumb wider, pinky smaller) on top of that.
  */
 export function nailBoxSize(
   shape: NailShape,
   neutralHeight: number,
-  length: number
+  length: number,
+  finger?: FingerId
 ): { width: number; height: number } {
   const [, , vbW, vbH] = NAIL_SHAPES[shape].viewBox.split(" ").map(Number);
+  const widthScale = finger ? FINGER_WIDTH_SCALE[finger] : 1;
+  const heightScale = finger ? FINGER_HEIGHT_SCALE[finger] : 1;
   return {
-    width: neutralHeight * (vbW / vbH),
-    height: neutralHeight * (LENGTH_SCALE[length] ?? 1),
+    width: neutralHeight * (vbW / vbH) * widthScale,
+    height: neutralHeight * (LENGTH_SCALE[length] ?? 1) * heightScale,
   };
 }
 

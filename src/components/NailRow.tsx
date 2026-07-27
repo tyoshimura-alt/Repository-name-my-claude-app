@@ -57,7 +57,7 @@ function HandRow({
           const id = `${hand}_${finger}` as NailId;
           const design = nailDesigns[id];
           const active = activeNail === id;
-          const { width, height } = nailBoxSize(design.shape, NEUTRAL_HEIGHT, design.length);
+          const { width, height } = nailBoxSize(design.shape, NEUTRAL_HEIGHT, design.length, finger);
           return (
             <button
               key={id}

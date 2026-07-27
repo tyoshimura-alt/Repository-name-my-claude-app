@@ -13,6 +13,7 @@ import {
   NailShape,
   PRESETS,
   nailBoxSize,
+  nailFinger,
   nailLabel,
 } from "@/lib/nail-designs";
 import NailGraphic from "@/components/NailGraphic";
@@ -149,7 +150,12 @@ export default function Home() {
     setFavorites((prev) => prev.filter((f) => f.id !== id));
   }
 
-  const bigBox = nailBoxSize(displayedDesign.shape, 160, displayedDesign.length);
+  const bigBox = nailBoxSize(
+    displayedDesign.shape,
+    160,
+    displayedDesign.length,
+    activeNail === "all" ? undefined : nailFinger(activeNail)
+  );
   const bigDef = NAIL_SHAPES[displayedDesign.shape];
 
   return (
@@ -289,8 +295,16 @@ export default function Home() {
                         {NAIL_IDS.filter((id) => id.startsWith(`${hand}_`)).map((id) => {
                           const d = fav.nails[id];
                           const def = NAIL_SHAPES[d.shape];
+                          const { width, height } = nailBoxSize(d.shape, 40, d.length, nailFinger(id));
                           return (
-                            <svg key={id} viewBox={def.viewBox} className="h-full">
+                            <svg
+                              key={id}
+                              viewBox={def.viewBox}
+                              preserveAspectRatio="none"
+                              width={width}
+                              height={height}
+                              className="self-end"
+                            >
                               <NailGraphic uid={`fav-${fav.id}-${id}`} {...d} />
                             </svg>
                           );
