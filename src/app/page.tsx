@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   DEFAULT_DESIGN,
   NAIL_PATTERNS,
@@ -101,6 +102,12 @@ export default function Home() {
         <p className="text-xs text-gray-500 mt-0.5">
           形・色・パターンを選んで、仕上がりをその場でチェック
         </p>
+        <Link
+          href="/talk-script"
+          className="inline-block mt-2 text-xs font-medium text-pink-600 hover:underline"
+        >
+          📞 AIテレアポ トークスクリプト管理はこちら
+        </Link>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-10">
